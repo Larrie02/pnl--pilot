@@ -1,0 +1,1059 @@
+/* =========================================================
+   PnL Pilot — style.css
+
+   1. Design tokens (colours, spacing, radii) for both themes
+   2. Base styles
+   3. Layout helpers
+   4. Navigation
+   5. Hero
+   6. Buttons and form controls
+   7. Calculator + results
+   8. Trade history
+   9. About + footer
+   10. Responsive rules
+   11. Reduced motion
+   ========================================================= */
+
+/* ---------- 1. DESIGN TOKENS ----------
+   Colours live in CSS variables so the theme toggle only has to
+   change the data-theme attribute on <html>. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #080d1a;
+  --bg-nav: #0b1122;
+  --surface: #0f1730;
+  --surface-2: #151f3d;
+  --border: #1f2c4d;
+  --border-strong: #2d3d66;
+
+  --text: #e8edf8;
+  --muted: #9aa8c8;
+
+  --accent: #9a9cff;          /* accent colour used for text and links */
+  --accent-solid: #5b5fe8;    /* accent colour used for button backgrounds */
+  --accent-solid-hover: #6d71f0;
+  --on-accent: #ffffff;
+  --focus: #b4b6ff;
+
+  --profit: #34d399;
+  --profit-bg: rgba(52, 211, 153, 0.12);
+  --loss: #ff7b7b;
+  --loss-bg: rgba(255, 123, 123, 0.12);
+  --neutral: #9aa8c8;
+  --neutral-bg: rgba(154, 168, 200, 0.12);
+  --warn: #f5b84a;
+  --warn-bg: rgba(245, 184, 74, 0.1);
+  --info-bg: rgba(154, 156, 255, 0.1);
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f3f5fb;
+  --bg-nav: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f3f5fb;
+  --border: #dbe1ef;
+  --border-strong: #b9c3dc;
+
+  --text: #0f1730;
+  --muted: #4f5d7a;
+
+  --accent: #4448d4;
+  --accent-solid: #4f53e0;
+  --accent-solid-hover: #4145cf;
+  --on-accent: #ffffff;
+  --focus: #4448d4;
+
+  --profit: #0a7f55;
+  --profit-bg: rgba(10, 127, 85, 0.1);
+  --loss: #c42b2b;
+  --loss-bg: rgba(196, 43, 43, 0.09);
+  --neutral: #4f5d7a;
+  --neutral-bg: rgba(79, 93, 122, 0.1);
+  --warn: #8a5a00;
+  --warn-bg: rgba(245, 184, 74, 0.16);
+  --info-bg: rgba(68, 72, 212, 0.07);
+
+  --shadow: 0 1px 2px rgba(15, 23, 48, 0.08);
+}
+
+:root {
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --nav-height: 64px;
+}
+
+/* ---------- 2. BASE ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The hidden attribute must always win over other display rules */
+[hidden] {
+  display: none !important;
+}
+
+h1, h2, h3, p, ul, dl, dd {
+  margin: 0;
+}
+
+h1, h2, h3 {
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Text that is only for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  background: var(--accent-solid);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ---------- 3. LAYOUT HELPERS ---------- */
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 48px 0;
+  scroll-margin-top: var(--nav-height);
+}
+
+.section-head {
+  margin-bottom: 24px;
+}
+
+.section-head h2 {
+  font-size: clamp(1.5rem, 3vw, 1.875rem);
+}
+
+.section-head p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.section-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.notice {
+  padding: 12px 14px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.notice-info {
+  background: var(--info-bg);
+  border-color: transparent;
+  color: var(--text);
+}
+
+.notice-warn {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--text);
+}
+
+/* ---------- 4. NAVIGATION ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--nav-height);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  border-radius: 8px;
+}
+
+.brand-icon {
+  color: var(--accent-solid);
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.nav-links a {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.menu-btn {
+  display: none;
+}
+
+/* Show the sun in dark theme (click = go light) and the moon in light theme */
+.icon-moon {
+  display: none;
+}
+
+[data-theme="light"] .icon-sun {
+  display: none;
+}
+
+[data-theme="light"] .icon-moon {
+  display: block;
+}
+
+/* ---------- 5. HERO ---------- */
+.hero {
+  padding: 72px 0 24px;
+}
+
+.hero-label {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.hero h1 {
+  margin-top: 20px;
+  max-width: 17ch;
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.hero-text {
+  margin-top: 20px;
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.hero-note {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.text-link {
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.text-link:hover {
+  border-bottom-color: currentColor;
+}
+
+/* ---------- 6. BUTTONS AND FORM CONTROLS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent-solid);
+  color: var(--on-accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-solid-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--loss);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--loss-bg);
+  border-color: var(--loss);
+}
+
+/* Long / Short toggle: two radio buttons styled as one control */
+.segmented {
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.segmented legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.segmented-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+/* The real radio inputs are hidden visually but still work with a keyboard */
+.segmented-options input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.segmented-options label {
+  display: block;
+  padding: 10px;
+  border-radius: 7px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.segmented-options label:hover {
+  color: var(--text);
+}
+
+.segmented-options input:checked + label {
+  background: var(--accent-solid);
+  color: var(--on-accent);
+}
+
+.segmented-options input:focus-visible + label {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+  margin-top: 20px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  transition: border-color 0.15s ease;
+}
+
+.input-wrap:hover {
+  border-color: var(--muted);
+}
+
+.input-wrap:focus-within {
+  border-color: var(--focus);
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.input-wrap.has-error {
+  border-color: var(--loss);
+}
+
+.input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.input-wrap input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.adornment {
+  padding-left: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.adornment-end {
+  padding-left: 0;
+  padding-right: 12px;
+}
+
+.adornment + input {
+  padding-left: 6px;
+}
+
+.hint {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.field-error {
+  margin-top: 6px;
+  color: var(--loss);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+#shortNote {
+  margin-top: 16px;
+}
+
+/* ---------- 7. CALCULATOR + RESULTS ---------- */
+.calc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.results h3 {
+  font-size: 1.1rem;
+}
+
+.pnl-hero {
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: var(--radius-control);
+  background: var(--neutral-bg);
+  border: 1px solid var(--border);
+}
+
+.pnl-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.pnl-value {
+  margin: 4px 0 10px;
+  font-size: clamp(2rem, 6vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  color: var(--neutral);
+}
+
+.state-pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--neutral-bg);
+  color: var(--neutral);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* The state (profit / loss / neutral / empty) is set by JavaScript on #resultsPanel */
+.results[data-state="profit"] .pnl-hero { background: var(--profit-bg); border-color: var(--profit); }
+.results[data-state="profit"] .pnl-value,
+.results[data-state="profit"] .state-pill,
+.results[data-state="profit"] .stat-pnl { color: var(--profit); }
+.results[data-state="profit"] .state-pill { background: var(--profit-bg); }
+
+.results[data-state="loss"] .pnl-hero { background: var(--loss-bg); border-color: var(--loss); }
+.results[data-state="loss"] .pnl-value,
+.results[data-state="loss"] .state-pill,
+.results[data-state="loss"] .stat-pnl { color: var(--loss); }
+.results[data-state="loss"] .state-pill { background: var(--loss-bg); }
+
+.results-error {
+  margin-top: 12px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.results-error:empty {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+  margin-top: 8px;
+}
+
+.stat {
+  min-width: 0;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  margin-top: 2px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.stat-note {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.stat-note:empty {
+  display: none;
+}
+
+/* Price scale */
+.ruler {
+  margin-top: 20px;
+}
+
+.ruler-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ruler-track {
+  position: relative;
+  height: 6px;
+  margin: 22px 10px 18px;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.ruler-range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--neutral);
+}
+
+.results[data-state="profit"] .ruler-range,
+.results[data-state="profit"] .dot-exit,
+.results[data-state="profit"] .swatch-exit { background: var(--profit); }
+
+.results[data-state="loss"] .ruler-range,
+.results[data-state="loss"] .dot-exit,
+.results[data-state="loss"] .swatch-exit { background: var(--loss); }
+
+.ruler-dot {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dot-entry,
+.swatch-entry { background: var(--text); }
+
+.dot-be,
+.swatch-be { background: var(--accent-solid); }
+
+.dot-exit,
+.swatch-exit { background: var(--neutral); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.legend strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+
+.save-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.save-message {
+  flex: 1;
+  min-width: 180px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.fine-print {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* ---------- 8. TRADE HISTORY ---------- */
+#storageNotice {
+  margin-bottom: 16px;
+}
+
+.history-card {
+  padding: 8px 24px;
+}
+
+.empty-state {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-title {
+  margin-bottom: 4px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 14px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.history-table th {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.history-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.history-table .num {
+  text-align: right;
+}
+
+.cell-profit { color: var(--profit); font-weight: 700; }
+.cell-loss { color: var(--loss); font-weight: 700; }
+.cell-neutral { color: var(--neutral); font-weight: 700; }
+
+.btn-small {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+}
+
+/* ---------- 9. ABOUT + FOOTER ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.about-text p {
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+.about-text p + p {
+  margin-top: 14px;
+}
+
+.disclaimer {
+  border-left: 3px solid var(--warn);
+}
+
+.disclaimer h3 {
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+}
+
+.disclaimer ul {
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.disclaimer li + li {
+  margin-top: 8px;
+}
+
+.site-footer {
+  margin-top: 32px;
+  padding: 28px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+}
+
+.site-footer strong {
+  color: var(--text);
+}
+
+/* ---------- 10. RESPONSIVE RULES ---------- */
+@media (max-width: 960px) {
+  .calc-grid,
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding-top: 48px;
+  }
+
+  .section {
+    padding: 36px 0;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  /* Mobile navigation: links collapse behind the menu button */
+  .menu-btn {
+    display: inline-flex;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 8px 16px 16px;
+    background: var(--bg-nav);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .site-header.nav-open .nav-links {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 12px;
+  }
+}
+
+/* The 8-column history table needs more room, so it stacks earlier than the rest */
+@media (max-width: 860px) {
+  /* History table becomes a stack of small cards */
+  .history-card {
+    padding: 4px 16px;
+  }
+
+  .history-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .history-table,
+  .history-table tbody,
+  .history-table tr,
+  .history-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .history-table tr {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .history-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .history-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 0;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .history-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .history-table td.cell-actions {
+    justify-content: flex-end;
+  }
+
+  .history-table td.cell-actions::before {
+    content: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .button-row .btn {
+    flex: 1;
+  }
+
+  .section-head-row .btn {
+    width: 100%;
+  }
+}
+
+/* ---------- 11. REDUCED MOTION ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

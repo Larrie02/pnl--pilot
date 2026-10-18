@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PnL Pilot | Crypto Profit &amp; Loss Calculator</title>
+  <meta name="description" content="PnL Pilot is a free crypto profit and loss calculator for long and short trades. Know your numbers. Trade with clarity.">
+
+  <!-- Small inline icon so the browser tab is not blank -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235b5fe8'/%3E%3Cpath d='M8 21l5-6 4 3 7-9' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <!--
+    This tiny script runs BEFORE the page is drawn. It reads the saved theme
+    from LocalStorage so a light-theme visitor never sees a dark flash.
+    The full theme logic lives in script.js.
+  -->
+  <script>
+    try {
+      var savedTheme = localStorage.getItem('pnlpilot.theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+    } catch (error) { /* LocalStorage blocked: the default dark theme is used */ }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#calculator">Skip to the calculator</a>
+
+  <!-- ============ NAVIGATION ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="PnL Pilot, back to top">
+        <svg class="brand-icon" width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="currentColor"></rect>
+          <path d="M8 21l5-6 4 3 7-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span class="brand-name">PnL Pilot</span>
+      </a>
+
+      <nav class="nav-links" id="primaryNav" aria-label="Primary">
+        <a href="#calculator">Calculator</a>
+        <a href="#history">Trade History</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch to light theme">
+          <!-- Sun icon (shown in dark theme) -->
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <!-- Moon icon (shown in light theme) -->
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn menu-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primaryNav">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <noscript>
+      <div class="container">
+        <p class="notice notice-warn">PnL Pilot needs JavaScript to run its calculations. Please enable JavaScript in your browser.</p>
+      </div>
+    </noscript>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="container">
+        <p class="hero-label">Calculator only. No live market data.</p>
+        <h1 id="heroTitle">Know Your Profit Before You Trade.</h1>
+        <p class="hero-text">
+          Calculate potential crypto trading profits, losses, fees, and break-even prices in seconds,
+          for both long and short trades.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#calculator">Open the calculator</a>
+          <a class="text-link" href="#about">How the numbers work</a>
+        </div>
+        <p class="hero-note">Everything runs in your browser. Your saved trades stay on this device.</p>
+      </div>
+    </section>
+
+    <!-- ============ CALCULATOR ============ -->
+    <section class="section" id="calculator" aria-labelledby="calculatorTitle">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="calculatorTitle">Calculator</h2>
+          <p>Results update as you type. Prices and amounts are in USD.</p>
+        </div>
+
+        <div class="calc-grid">
+          <!-- ---- Inputs ---- -->
+          <form class="card" id="calcForm" novalidate aria-label="Trade inputs">
+            <p class="notice notice-info" id="exampleNotice">
+              These are example values. Edit any field to calculate your own trade.
+            </p>
+
+            <fieldset class="segmented">
+              <legend>Position type</legend>
+              <div class="segmented-options">
+                <input type="radio" name="positionType" id="posLong" value="long" checked>
+                <label for="posLong">Long</label>
+                <input type="radio" name="positionType" id="posShort" value="short">
+                <label for="posShort">Short</label>
+              </div>
+            </fieldset>
+
+            <p class="notice notice-warn" id="shortNote" hidden>
+              Short mode uses a simplified model. The investment amount is a reference notional,
+              not your margin, collateral or required capital. Leverage, liquidation and margin
+              requirements are not modelled.
+            </p>
+
+            <div class="field-grid">
+              <div class="field field-full">
+                <label for="investment">Investment amount (USD)</label>
+                <div class="input-wrap">
+                  <span class="adornment" aria-hidden="true">$</span>
+                  <input type="number" id="investment" name="investment" value="1000" step="any" inputmode="decimal" autocomplete="off" placeholder="1000" aria-describedby="investmentHint investmentError">
+                </div>
+                <p class="hint" id="investmentHint">Amount allocated to the position, before the buy fee.</p>
+                <p class="field-error" id="investmentError" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <label for="entryPrice">Entry price (USD)</label>
+                <div class="input-wrap">
+                  <span class="adornment" aria-hidden="true">$</span>
+                  <input type="number" id="entryPrice" name="entryPrice" value="64250" step="any" inputmode="decimal" autocomplete="off" placeholder="64250" aria-describedby="entryPriceHint entryPriceError">
+                </div>
+                <p class="hint" id="entryPriceHint">Price per token.</p>
+                <p class="field-error" id="entryPriceError" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <label for="exitPrice">Exit price (USD)</label>
+                <div class="input-wrap">
+                  <span class="adornment" aria-hidden="true">$</span>
+                  <input type="number" id="exitPrice" name="exitPrice" value="68900" step="any" inputmode="decimal" autocomplete="off" placeholder="68900" aria-describedby="exitPriceHint exitPriceError">
+                </div>
+                <p class="hint" id="exitPriceHint">Price per token.</p>
+                <p class="field-error" id="exitPriceError" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <label for="buyFee" id="buyFeeLabel">Buy fee (%)</label>
+                <div class="input-wrap">
+                  <input type="number" id="buyFee" name="buyFee" value="0.1" step="any" inputmode="decimal" autocomplete="off" placeholder="0.1" aria-describedby="buyFeeHint buyFeeError">
+                  <span class="adornment adornment-end" aria-hidden="true">%</span>
+                </div>
+                <p class="hint" id="buyFeeHint">Percent of your investment amount. 0.1 means 0.1%.</p>
+                <p class="field-error" id="buyFeeError" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <label for="sellFee" id="sellFeeLabel">Sell fee (%)</label>
+                <div class="input-wrap">
+                  <input type="number" id="sellFee" name="sellFee" value="0.1" step="any" inputmode="decimal" autocomplete="off" placeholder="0.1" aria-describedby="sellFeeHint sellFeeError">
+                  <span class="adornment adornment-end" aria-hidden="true">%</span>
+                </div>
+                <p class="hint" id="sellFeeHint">Percent of the exit value. 0.1 means 0.1%.</p>
+                <p class="field-error" id="sellFeeError" aria-live="polite"></p>
+              </div>
+
+              <div class="field field-full">
+                <label for="extraCosts">Additional costs (USD, optional)</label>
+                <div class="input-wrap">
+                  <span class="adornment" aria-hidden="true">$</span>
+                  <input type="number" id="extraCosts" name="extraCosts" value="5" step="any" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="extraCostsHint extraCostsError">
+                </div>
+                <p class="hint" id="extraCostsHint">For example gas fees or other trading expenses. Leave empty for none.</p>
+                <p class="field-error" id="extraCostsError" aria-live="polite"></p>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button class="btn btn-primary" type="submit" id="calculateBtn">Calculate</button>
+              <button class="btn btn-secondary" type="button" id="resetBtn">Reset to examples</button>
+            </div>
+          </form>
+
+          <!-- ---- Results ---- -->
+          <section class="card results" id="resultsPanel" data-state="empty" aria-labelledby="resultsTitle">
+            <h3 id="resultsTitle">Results</h3>
+
+            <div class="pnl-hero">
+              <p class="pnl-label">Net profit or loss</p>
+              <p class="pnl-value" id="resultPnl">&mdash;</p>
+              <p class="state-pill" id="resultState">No result</p>
+            </div>
+
+            <p class="results-error" id="resultsError"></p>
+            <p class="sr-only" id="resultsAnnouncer" role="status"></p>
+
+            <dl class="stats">
+              <div class="stat">
+                <dt>Net return</dt>
+                <dd class="stat-value stat-pnl" id="resultReturn">&mdash;</dd>
+                <dd class="stat-note">Net profit or loss divided by your investment amount.</dd>
+              </div>
+              <div class="stat">
+                <dt>Break-even exit price</dt>
+                <dd class="stat-value" id="resultBreakEven">&mdash;</dd>
+                <dd class="stat-note" id="resultBreakEvenNote"></dd>
+              </div>
+              <div class="stat">
+                <dt>Token quantity</dt>
+                <dd class="stat-value" id="resultQuantity">&mdash;</dd>
+                <dd class="stat-note">Investment amount divided by entry price.</dd>
+              </div>
+              <div class="stat">
+                <dt>Entry notional value</dt>
+                <dd class="stat-value" id="resultEntryNotional">&mdash;</dd>
+                <dd class="stat-note">The investment amount you entered.</dd>
+              </div>
+              <div class="stat">
+                <dt>Exit notional value</dt>
+                <dd class="stat-value" id="resultExitValue">&mdash;</dd>
+                <dd class="stat-note">Token quantity multiplied by exit price, before fees.</dd>
+              </div>
+              <div class="stat">
+                <dt>Total fees and additional costs</dt>
+                <dd class="stat-value" id="resultCosts">&mdash;</dd>
+                <dd class="stat-note" id="resultCostsNote"></dd>
+              </div>
+            </dl>
+
+            <!-- Simple price scale: entry, break-even and exit on one line -->
+            <div class="ruler" id="ruler" hidden>
+              <p class="ruler-title">Where your prices sit</p>
+              <div class="ruler-track" aria-hidden="true">
+                <span class="ruler-range" id="rulerRange"></span>
+                <span class="ruler-dot dot-entry" id="dotEntry"></span>
+                <span class="ruler-dot dot-be" id="dotBreakEven"></span>
+                <span class="ruler-dot dot-exit" id="dotExit"></span>
+              </div>
+              <ul class="legend">
+                <li><span class="swatch swatch-entry" aria-hidden="true"></span>Entry <strong id="legendEntry"></strong></li>
+                <li id="legendBreakEvenItem"><span class="swatch swatch-be" aria-hidden="true"></span>Break-even <strong id="legendBreakEven"></strong></li>
+                <li><span class="swatch swatch-exit" aria-hidden="true"></span>Exit <strong id="legendExit"></strong></li>
+              </ul>
+            </div>
+
+            <div class="save-row">
+              <button class="btn btn-primary" type="button" id="saveBtn" disabled>Save trade</button>
+              <p class="save-message" id="saveMessage" role="status"></p>
+            </div>
+
+            <p class="fine-print">
+              Displayed values are rounded for readability. Calculations use the full precision of your inputs.
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TRADE HISTORY ============ -->
+    <section class="section" id="history" aria-labelledby="historyTitle">
+      <div class="container">
+        <div class="section-head section-head-row">
+          <div>
+            <h2 id="historyTitle" tabindex="-1">Trade History</h2>
+            <p id="historyCount">Loading saved trades&hellip;</p>
+          </div>
+          <button class="btn btn-danger" type="button" id="clearBtn" disabled>Clear all history</button>
+        </div>
+
+        <p class="notice notice-warn" id="storageNotice" hidden></p>
+
+        <div class="card history-card">
+          <div class="empty-state" id="historyEmpty" hidden>
+            <p class="empty-title">No saved trades yet</p>
+            <p>Calculate a trade above, then select <strong>Save trade</strong> to keep it here.</p>
+          </div>
+
+          <table class="history-table" id="historyTable" hidden>
+            <caption class="sr-only">Saved trades, newest first</caption>
+            <thead>
+              <tr>
+                <th scope="col">Saved</th>
+                <th scope="col">Position</th>
+                <th scope="col" class="num">Investment</th>
+                <th scope="col" class="num">Entry</th>
+                <th scope="col" class="num">Exit</th>
+                <th scope="col" class="num">Net P&amp;L</th>
+                <th scope="col" class="num">Return</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT + DISCLAIMER ============ -->
+    <section class="section" id="about" aria-labelledby="aboutTitle">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="aboutTitle">About PnL Pilot</h2>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-text">
+            <p>
+              PnL Pilot helps traders estimate the result of a trade before they place it, or check a trade they
+              have already closed. It turns a few inputs into a clear net profit or loss, a return percentage and
+              a break-even price.
+            </p>
+            <p>
+              It is built for crypto and memecoin traders, and for beginners learning how trading maths works.
+              It is a simple frontend-only tool. It does not connect to a wallet, execute trades, ask for private
+              keys or seed phrases, or fetch live prices. You type in the numbers and it does the maths.
+            </p>
+            <p>
+              The formulas and simplifying assumptions are documented in the project README so you can check
+              every result yourself.
+            </p>
+          </div>
+
+          <aside class="card disclaimer" aria-labelledby="disclaimerTitle">
+            <h3 id="disclaimerTitle">Disclaimer</h3>
+            <ul>
+              <li>Calculations are estimates. Actual trading results may differ.</li>
+              <li>Slippage, funding costs, liquidation, taxes, network fees and other expenses may not be fully represented.</li>
+              <li>This tool is for educational and informational purposes only. It does not provide financial advice.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p><strong>PnL Pilot</strong> &mdash; Know your numbers. Trade with clarity.</p>
+      <p>
+        &copy; <span id="footerYear">2026</span> PnL Pilot.
+        <!-- TODO: replace href="#" with the link to your portfolio when it is ready -->
+        <a href="#" id="portfolioLink">Portfolio (coming soon)</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
